@@ -3,13 +3,18 @@
 # ACME Certificate Management Script
 # Automatically issues and manages SSL certificates using acme.sh
 #
+
+# Start nginx in background
+echo "[INFO] Starting nginx..."
+nginx
+
 set -e
 
 # =============================================================================
 # Configuration
 # =============================================================================
 DOMAINS=${DOMAINS:-"example.com"}
-ACME_HTTP_PORT=${ACME_HTTP_PORT:-"80"}
+WEBROOT_PATH=${WEBROOT_PATH:-"/webroot"}
 ACME_EMAIL=${ACME_EMAIL:-"admin@example.com"}
 ACME_ENV=${ACME_ENV:-"prod"}
 
@@ -32,7 +37,6 @@ log_error() {
 # Setup ACME Environment
 # =============================================================================
 log_info "Initializing ACME certificate management..."
-log_info "ACME HTTP challenge port: $ACME_HTTP_PORT"
 
 if [ "$ACME_ENV" = "staging" ] || [ "$ACME_ENV" = "stag" ]; then
     log_info "Configuring Let's Encrypt STAGING environment"
@@ -84,14 +88,14 @@ for DOMAIN in $DOMAINS; do
         log_info "No certificate found for domain: $DOMAIN"
         log_info "Issuing new certificate for: $DOMAIN"
 
-        acme.sh --issue -d "$DOMAIN" --standalone --httpport "$ACME_HTTP_PORT"
+        acme.sh --issue -d "$DOMAIN" --webroot "$WEBROOT_PATH"
 
         log_info "Installing certificate for: $DOMAIN"
         acme.sh --install-cert -d "$DOMAIN" \
             --cert-file      /acme.sh/$DOMAIN/cert.pem \
             --key-file       /acme.sh/$DOMAIN/key.pem \
             --fullchain-file /acme.sh/$DOMAIN/fullchain.pem \
-            #--reloadcmd     "/scripts/deploy.sh $DOMAIN"
+            --reloadcmd     "/scripts/deploy.sh $DOMAIN"
     else
         log_info "Certificate for domain '$DOMAIN' already exists - skipping issuance"
     fi

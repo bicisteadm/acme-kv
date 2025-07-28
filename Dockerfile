@@ -34,8 +34,8 @@ RUN pipx install azure-cli && \
     ln -s /root/.local/bin/az /usr/local/bin/az
 
 # Set up directories for appuser (don't create .acme.sh - let installer do it)
-RUN mkdir -p /acme.sh /scripts && \
-    chown -R appuser:appgroup /home/appuser /acme.sh /scripts
+RUN mkdir -p /acme.sh /webroot /scripts && \
+    chown -R appuser:appgroup /home/appuser /acme.sh /webroot /scripts
 
 # Switch to appuser for installation
 USER appuser
@@ -54,19 +54,22 @@ RUN ln -sf /home/appuser/.acme.sh/acme.sh /usr/local/bin/acme.sh && \
         chmod +x /usr/local/bin/--${verb}; \
     done
 
-# Copy our scripts
+# Copy our scripts and nginx config
 COPY scripts/ /scripts/
 COPY entrypoint.sh /entrypoint.sh
+COPY nginx.conf /etc/nginx/nginx.conf
 RUN chmod +x /entrypoint.sh /scripts/deploy.sh && \
     chown -R appuser:appgroup /scripts /entrypoint.sh
+
+RUN apk --no-cache add -f nginx
 
 # Environment variables
 ENV LE_CONFIG_HOME=/acme.sh
 ENV AUTO_UPGRADE=1
 ENV PFX_PASS=MySuperSecret123
 
-# Expose HTTP port for ACME challenges
-EXPOSE 80
+# Expose HTTP port for health check and ACME challenges
+EXPOSE 8080
 
 # Switch to non-root user
 USER appuser
