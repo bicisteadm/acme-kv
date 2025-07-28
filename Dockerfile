@@ -1,4 +1,4 @@
-FROM neilpang/acme.sh:latest
+FROM neilpang/acme.sh:3.1.1
 
 # Install Azure CLI
 RUN apk add --no-cache bash python3 py3-pip build-base python3-dev linux-headers pipx && \
