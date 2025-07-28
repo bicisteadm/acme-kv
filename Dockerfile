@@ -2,7 +2,8 @@ FROM neilpang/acme.sh:latest
 
 # Install Azure CLI
 RUN apk add --no-cache python3 py3-pip build-base python3-dev linux-headers pipx && \
-    pipx install azure-cli
+    pipx install azure-cli && \
+    pipx ensurepath
 
 # Copy our scripts
 COPY scripts/ /scripts/
