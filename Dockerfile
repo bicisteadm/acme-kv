@@ -57,6 +57,7 @@ RUN ln -sf /home/appuser/.acme.sh/acme.sh /usr/local/bin/acme.sh && \
 # Copy our scripts and nginx config
 COPY scripts/ /scripts/
 COPY entrypoint.sh /entrypoint.sh
+
 COPY nginx.conf /etc/nginx/nginx.conf
 RUN chmod +x /entrypoint.sh /scripts/deploy.sh && \
     chown -R appuser:appgroup /scripts /entrypoint.sh
