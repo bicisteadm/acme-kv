@@ -1,0 +1,9 @@
+services:
+  acme-kv:
+    build: .
+    container_name: acme-kv
+    env_file:
+      - .env
+    volumes:
+      - ./acme:/acme.sh
+    #restart: unless-stopped
