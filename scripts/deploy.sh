@@ -3,7 +3,7 @@
 set -e
 
 DOMAIN="$1"
-KEYVAULT_NAME="${KEYVAULT_NAME:-mojekeyvault}"
+KEYVAULT_NAME="${KEYVAULT_NAME}"
 CERT_PATH="/acme.sh/$DOMAIN/fullchain.pem"
 KEY_PATH="/acme.sh/$DOMAIN/key.pem"
 PFX_PATH="/tmp/$DOMAIN.pfx"
