@@ -6,4 +6,5 @@ services:
       - .env
     volumes:
       - ./acme:/acme.sh
+      - ./webroot:/webroot
     #restart: unless-stopped
