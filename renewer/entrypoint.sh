@@ -90,7 +90,7 @@ for DOMAIN in $DOMAINS; do
             --cert-file      /acme.sh/$DOMAIN/cert.pem \
             --key-file       /acme.sh/$DOMAIN/key.pem \
             --fullchain-file /acme.sh/$DOMAIN/fullchain.pem \
-            --reloadcmd     "/scripts/deploy.sh $DOMAIN"
+            #--reloadcmd     "/scripts/deploy.sh $DOMAIN"
     else
         log_info "Certificate for domain '$DOMAIN' already exists - skipping issuance"
     fi
