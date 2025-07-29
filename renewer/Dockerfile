@@ -58,8 +58,10 @@ RUN ln -sf /home/appuser/.acme.sh/acme.sh /usr/local/bin/acme.sh && \
 COPY scripts/ /scripts/
 COPY entrypoint.sh /entrypoint.sh
 
-RUN chmod +x /entrypoint.sh /scripts/deploy.sh && \
-    chown -R appuser:appgroup /scripts /entrypoint.sh
+# Create logs directory and set permissions
+RUN mkdir -p /logs && \
+    chmod +x /entrypoint.sh /scripts/deploy.sh /scripts/logging.sh && \
+    chown -R appuser:appgroup /scripts /entrypoint.sh /logs
 
 # Environment variables
 ENV LE_CONFIG_HOME=/acme.sh

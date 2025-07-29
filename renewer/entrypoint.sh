@@ -19,52 +19,8 @@ LOG_FILE="$LOG_DIR/acme-$(date +%Y%m%d-%H%M%S).log"
 # Convert comma-separated domains to space-separated for easier iteration
 DOMAINS_LIST=$(echo "$DOMAINS" | tr ',' ' ')
 
-# =============================================================================
-# Functions
-# =============================================================================
-log_info() {
-    local timestamp=$(date '+%Y-%m-%d %H:%M:%S')
-    local message="[$timestamp] [INFO] $1"
-    echo "$message"
-    if [ "$LOG_TO_FILE" = "true" ]; then
-        echo "$message" >> "$LOG_FILE"
-    fi
-}
-
-log_warn() {
-    local timestamp=$(date '+%Y-%m-%d %H:%M:%S')
-    local message="[$timestamp] [WARN] $1"
-    echo "$message"
-    if [ "$LOG_TO_FILE" = "true" ]; then
-        echo "$message" >> "$LOG_FILE"
-    fi
-}
-
-log_error() {
-    local timestamp=$(date '+%Y-%m-%d %H:%M:%S')
-    local message="[$timestamp] [ERROR] $1"
-    echo "$message" >&2
-    if [ "$LOG_TO_FILE" = "true" ]; then
-        echo "$message" >> "$LOG_FILE"
-    fi
-}
-
-# Function to execute acme.sh commands with logging
-run_acme_cmd() {
-    if [ "$LOG_TO_FILE" = "true" ]; then
-        # Capture both stdout and stderr, display on console and log to file
-        {
-            acme.sh "$@" 2>&1 | while IFS= read -r line; do
-                local timestamp=$(date '+%Y-%m-%d %H:%M:%S')
-                echo "[$timestamp] [ACME] $line"
-                echo "[$timestamp] [ACME] $line" >> "$LOG_FILE"
-            done
-        }
-    else
-        # Just run normally if file logging is disabled
-        acme.sh "$@"
-    fi
-}
+# Load shared logging functions
+. /scripts/logging.sh
 
 # =============================================================================
 # Setup ACME Environment
@@ -129,7 +85,7 @@ for DOMAIN in $DOMAINS_LIST; do
       --cert-file      /acme.sh/$DOMAIN/cert.pem \
       --key-file       /acme.sh/$DOMAIN/key.pem \
       --fullchain-file /acme.sh/$DOMAIN/fullchain.pem \
-      #--reloadcmd     "/scripts/deploy.sh $DOMAIN"
+      --reloadcmd     "/scripts/deploy.sh $DOMAIN"
 done
 
 # =============================================================================
