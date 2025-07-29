@@ -8,9 +8,9 @@ set -e
 # =============================================================================
 # Configuration
 # =============================================================================
-DOMAINS=${DOMAINS}
+DOMAINS=${DOMAINS:-""}
 WEBROOT_PATH=${WEBROOT_PATH:-"/webroot"}
-ACME_EMAIL=${ACME_EMAIL}
+ACME_EMAIL=${ACME_EMAIL:-""}
 ACME_ENV=${ACME_ENV:-"prod"}
 LOG_DIR=${LOG_DIR:-"/logs"}
 LOG_TO_FILE=${LOG_TO_FILE:-"false"}
@@ -21,6 +21,19 @@ DOMAINS_LIST=$(echo "$DOMAINS" | tr ',' ' ')
 
 # Load shared logging functions
 . /scripts/logging.sh
+
+# =============================================================================
+# Validation
+# =============================================================================
+if [ -z "$DOMAINS" ]; then
+    log_error "DOMAINS environment variable is required"
+    exit 1
+fi
+
+if [ -z "$ACME_EMAIL" ]; then
+    log_error "ACME_EMAIL environment variable is required"
+    exit 1
+fi
 
 # =============================================================================
 # Setup ACME Environment

@@ -51,7 +51,6 @@ log_error() {
 
 # Function to execute acme.sh commands with logging
 run_acme_cmd() {
-    local exit_code
     if [ "$LOG_TO_FILE" = "true" ]; then
         # Capture both stdout and stderr, display on console and log to file
         {
@@ -61,20 +60,16 @@ run_acme_cmd() {
                 echo "[$timestamp] [ACME] $line" >> "$LOG_FILE"
             done
         }
-        exit_code=${PIPESTATUS[0]}
     else
         # Just run normally if file logging is disabled
         acme.sh "$@"
-        exit_code=$?
     fi
-    return $exit_code
 }
 
 # Function to execute any command with logging
 run_cmd() {
     local cmd_name="$1"
     shift
-    local exit_code
     
     if [ "$LOG_TO_FILE" = "true" ]; then
         # Capture both stdout and stderr, display on console and log to file
@@ -85,11 +80,8 @@ run_cmd() {
                 echo "[$timestamp] [$cmd_name] $line" >> "$LOG_FILE"
             done
         }
-        exit_code=${PIPESTATUS[0]}
     else
         # Just run normally if file logging is disabled
         "$@"
-        exit_code=$?
     fi
-    return $exit_code
 }
