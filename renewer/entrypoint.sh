@@ -3,11 +3,6 @@
 # ACME Certificate Management Script
 # Automatically issues and manages SSL certificates using acme.sh
 #
-
-# Start nginx in background
-echo "[INFO] Starting nginx..."
-nginx
-
 set -e
 
 # =============================================================================

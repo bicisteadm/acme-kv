@@ -1,10 +1,15 @@
 services:
-  acme-kv:
-    build: .
-    container_name: acme-kv
+  serving:
+    build: ./serving
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./webroot:/webroot
+  
+  renewer:
+    build: ./renewer
     env_file:
-      - .env
+      - ./renewer/.env
     volumes:
       - ./acme:/acme.sh
       - ./webroot:/webroot
-    #restart: unless-stopped

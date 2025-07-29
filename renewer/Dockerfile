@@ -54,23 +54,17 @@ RUN ln -sf /home/appuser/.acme.sh/acme.sh /usr/local/bin/acme.sh && \
         chmod +x /usr/local/bin/--${verb}; \
     done
 
-# Copy our scripts and nginx config
+# Copy our scripts 
 COPY scripts/ /scripts/
 COPY entrypoint.sh /entrypoint.sh
 
-COPY nginx.conf /etc/nginx/nginx.conf
 RUN chmod +x /entrypoint.sh /scripts/deploy.sh && \
     chown -R appuser:appgroup /scripts /entrypoint.sh
-
-RUN apk --no-cache add -f nginx
 
 # Environment variables
 ENV LE_CONFIG_HOME=/acme.sh
 ENV AUTO_UPGRADE=1
 ENV PFX_PASS=MySuperSecret123
-
-# Expose HTTP port for health check and ACME challenges
-EXPOSE 8080
 
 # Switch to non-root user
 USER appuser
