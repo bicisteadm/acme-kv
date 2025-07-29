@@ -7,9 +7,10 @@ set -e
 # =============================================================================
 DOMAIN="$1"
 KEYVAULT_NAME="${KEYVAULT_NAME}"
-CERT_PATH="/acme.sh/$DOMAIN/cert.pem"
-KEY_PATH="/acme.sh/$DOMAIN/key.pem"
-PFX_PATH="/acme.sh/$DOMAIN.pfx"
+DOMAIN_DIR="/acme.sh/$DOMAIN"
+CERT_PATH="$DOMAIN_DIR/cert.pem"
+KEY_PATH="$DOMAIN_DIR/key.pem"
+PFX_PATH="$DOMAIN_DIR/$DOMAIN.pfx"
 PFX_PASS="${PFX_PASS}"
 
 # Set log file for deploy script
@@ -26,6 +27,9 @@ if [ -z "$DOMAIN" ]; then
     log_error "Domain name is required as first argument"
     exit 1
 fi
+
+# Create domain directory if it doesn't exist
+mkdir -p "$DOMAIN_DIR"
 
 # Check if certificate files exist
 if [ ! -f "$CERT_PATH" ] || [ ! -f "$KEY_PATH" ]; then
@@ -49,15 +53,13 @@ fi
 # =============================================================================
 log_info "Creating PFX for domain: $DOMAIN..."
 
-cat $CERT_PATH $KEY_PATH > /acme.sh/$DOMAIN/$DOMAIN.pem
-if ! run_cmd "OPENSSL" openssl pkcs12 -export -in /acme.sh/$DOMAIN/$DOMAIN.pem -out $DOMAIN.pfx -password pass:$PFX_PASS; then
+cat "$CERT_PATH" "$KEY_PATH" > "$DOMAIN_DIR/$DOMAIN.pem"
+if ! run_cmd "OPENSSL" openssl pkcs12 -export -in "$DOMAIN_DIR/$DOMAIN.pem" -out "$PFX_PATH" -password pass:$PFX_PASS; then
     log_error "Failed to create PFX file for domain: $DOMAIN"
     exit 1
 fi
 
-log_info "PFX file created successfully: $DOMAIN.pfx"
-
-log_info "PFX file created successfully: $DOMAIN.pfx"
+log_info "PFX file created successfully: $PFX_PATH"
 
 # =============================================================================
 # Key Vault Upload (commented out)
