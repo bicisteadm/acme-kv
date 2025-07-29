@@ -28,9 +28,6 @@ if [ -z "$DOMAIN" ]; then
     exit 1
 fi
 
-# Create domain directory if it doesn't exist
-mkdir -p "$DOMAIN_DIR"
-
 # Check if certificate files exist
 if [ ! -f "$CERT_PATH" ] || [ ! -f "$KEY_PATH" ]; then
     log_error "Certificate files not found for domain: $DOMAIN"

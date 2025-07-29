@@ -94,6 +94,10 @@ for DOMAIN in $DOMAINS_LIST; do
   run_acme_cmd --issue -d "$DOMAIN" --webroot "$WEBROOT_PATH"
 
   log_info "Installing certificate for: $DOMAIN"
+
+  # Create domain directory if it doesn't exist
+  mkdir -p "/acme.sh/$DOMAIN"
+
   run_acme_cmd --install-cert -d "$DOMAIN" \
       --cert-file      /acme.sh/$DOMAIN/cert.pem \
       --key-file       /acme.sh/$DOMAIN/key.pem \
