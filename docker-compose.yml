@@ -13,3 +13,4 @@ services:
     volumes:
       - ./acme:/acme.sh
       - ./webroot:/webroot
+      - ./logs:/logs
