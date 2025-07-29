@@ -25,7 +25,7 @@ on:
 
 env:
   REGISTRY: docker.io
-  IMAGE_NAME: acme-kv
+  BASE_IMAGE_NAME: acme-kv
 
 jobs:
   build-and-push:
@@ -33,7 +33,11 @@ jobs:
     permissions:
       contents: read
       packages: write
-
+    
+    strategy:
+      matrix:
+        service: [serving, renewer]
+    
     steps:
     - name: Checkout repository
       uses: actions/checkout@v4
@@ -53,7 +57,7 @@ jobs:
       id: meta
       uses: docker/metadata-action@v5
       with:
-        images: ${{ env.REGISTRY }}/${{ secrets.DOCKERHUB_USERNAME }}/${{ env.IMAGE_NAME }}
+        images: ${{ env.REGISTRY }}/${{ secrets.DOCKERHUB_USERNAME }}/${{ env.BASE_IMAGE_NAME }}-${{ matrix.service }}
         tags: |
           type=ref,event=branch
           type=ref,event=pr
@@ -63,18 +67,18 @@ jobs:
           type=raw,value=latest,enable={{is_default_branch}}
           type=raw,value=${{ inputs.tag }},enable=${{ github.event_name == 'workflow_dispatch' }}
 
-    - name: Build and push Docker image
+    - name: Build and push Docker image for ${{ matrix.service }}
       id: build-and-push
       uses: docker/build-push-action@v5
       with:
-        context: .
-        file: ./Dockerfile
+        context: ./${{ matrix.service }}
+        file: ./${{ matrix.service }}/Dockerfile
         platforms: linux/amd64,linux/arm64
         push: ${{ github.event_name != 'pull_request' && (github.event_name != 'workflow_dispatch' || inputs.push_to_registry) }}
         tags: ${{ steps.meta.outputs.tags }}
         labels: ${{ steps.meta.outputs.labels }}
-        cache-from: type=gha
-        cache-to: type=gha,mode=max
+        cache-from: type=gha,scope=${{ matrix.service }}
+        cache-to: type=gha,mode=max,scope=${{ matrix.service }}
 
-    - name: Image digest
-      run: echo ${{ steps.build-and-push.outputs.digest }}
+    - name: Image digest for ${{ matrix.service }}
+      run: echo "${{ matrix.service }} digest:${{ steps.build-and-push.outputs.digest }}"
