@@ -16,6 +16,9 @@ LOG_DIR=${LOG_DIR:-"/logs"}
 LOG_TO_FILE=${LOG_TO_FILE:-"false"}
 LOG_FILE="$LOG_DIR/acme-$(date +%Y%m%d-%H%M%S).log"
 
+# Convert comma-separated domains to space-separated for easier iteration
+DOMAINS_LIST=$(echo "$DOMAINS" | tr ',' ' ')
+
 # =============================================================================
 # Functions
 # =============================================================================
@@ -108,7 +111,7 @@ for CERT_DIR in /acme.sh/*/; do
         BASE_DOMAIN=$(echo "$CERT_DOMAIN" | sed 's/_ecc$//')
         
         # Check if this domain is still needed
-        echo "$DOMAINS" | grep -q "$BASE_DOMAIN" || {
+        echo "$DOMAINS_LIST" | grep -q "$BASE_DOMAIN" || {
             log_info "Removing unused certificate for: $CERT_DOMAIN"
             run_acme_cmd --remove -d "$BASE_DOMAIN" || log_warn "Failed to remove certificate for $CERT_DOMAIN"
         }
@@ -116,24 +119,17 @@ for CERT_DIR in /acme.sh/*/; do
 done
 
 # Issue certificates for current domains
-for DOMAIN in $DOMAINS; do
-    CONF_PATH="/acme.sh/$DOMAIN/$DOMAIN.conf"
+for DOMAIN in $DOMAINS_LIST; do
+  log_info "Issuing certificate for: $DOMAIN"
 
-    if [ ! -f "$CONF_PATH" ]; then
-        log_info "No certificate found for domain: $DOMAIN"
-        log_info "Issuing new certificate for: $DOMAIN"
+  run_acme_cmd --issue -d "$DOMAIN" --webroot "$WEBROOT_PATH"
 
-        run_acme_cmd --issue -d "$DOMAIN" --webroot "$WEBROOT_PATH"
-
-        log_info "Installing certificate for: $DOMAIN"
-        run_acme_cmd --install-cert -d "$DOMAIN" \
-            --cert-file      /acme.sh/$DOMAIN/cert.pem \
-            --key-file       /acme.sh/$DOMAIN/key.pem \
-            --fullchain-file /acme.sh/$DOMAIN/fullchain.pem \
-            #--reloadcmd     "/scripts/deploy.sh $DOMAIN"
-    else
-        log_info "Certificate for domain '$DOMAIN' already exists - skipping issuance"
-    fi
+  log_info "Installing certificate for: $DOMAIN"
+  run_acme_cmd --install-cert -d "$DOMAIN" \
+      --cert-file      /acme.sh/$DOMAIN/cert.pem \
+      --key-file       /acme.sh/$DOMAIN/key.pem \
+      --fullchain-file /acme.sh/$DOMAIN/fullchain.pem \
+      #--reloadcmd     "/scripts/deploy.sh $DOMAIN"
 done
 
 # =============================================================================
